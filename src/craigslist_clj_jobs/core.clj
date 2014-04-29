@@ -8,6 +8,17 @@
 (def job-listing-selector [:div#toc_rows :div.content :p.row :span.pl :a])
 (def cl-app-dir-name ".craigslist-jobs")
 
+(defn- get-cl-app-dir
+  "Returns a java.io.File object for the user's app directory."
+  []
+  (doto (java.io.File. (str (System/getProperty "user.home") java.io.File/separator cl-app-dir-name))
+    (.mkdirs)))
+
+(defn- get-query-file
+  "Returns a java.io.File for the given query."
+  [q]
+  (java.io.File. (get-cl-app-dir) (str q ".clj")))
+
 (defn- get-query-enlive-tags
   "Return a collection of Enlive :a tags representing the results of the given
 query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
@@ -23,9 +34,7 @@ query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
   "Returns the set of query result URLs that were obtained from the previous run
   of this program."
   [q]
-  (let [cl-app-dir (doto (java.io.File. (str (System/getProperty "user.home") java.io.File/separator cl-app-dir-name))
-                     (.mkdirs))
-        results-file (java.io.File. cl-app-dir (str q ".clj"))]
+  (let [results-file (get-query-file q)]
     (if (.exists results-file)
       (with-open [pbrdr (java.io.PushbackReader. (io/reader results-file))]
         (edn/read pbrdr))
