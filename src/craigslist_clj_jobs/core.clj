@@ -10,7 +10,9 @@
 
 (defn- get-query-enlive-tags
   "Return a collection of Enlive :a tags representing the results of the given
-query."
+query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
+  attributes one of which will be :href) and finally :content which will be the
+  text found within the :a tag."
   [q]
   (let [query-url (str craigslist-clj-jobs-url q)
         results (-> (html/html-resource (java.net.URL. query-url))
@@ -22,9 +24,8 @@ query."
   of this program."
   [q]
   (let [cl-app-dir (doto (java.io.File. (str (System/getProperty "user.home") java.io.File/separator cl-app-dir-name))
-                     (.mkdirs)
-                     prn)
-        results-file (doto (java.io.File. cl-app-dir (str q ".clj")) prn)]
+                     (.mkdirs))
+        results-file (java.io.File. cl-app-dir (str q ".clj"))]
     (if (.exists results-file)
       (with-open [pbrdr (java.io.PushbackReader. (io/reader results-file))]
         (edn/read pbrdr))
@@ -35,7 +36,7 @@ query."
   search results that are new than those from the previous run of this
   function with the given query parameter."
   [q]
-  )
+  (let [previous-urls (get-previous-query-results-urls q)]))
 
 (defn- htmlify-query-results
   [r])
