@@ -36,7 +36,12 @@ query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
   search results that are new than those from the previous run of this
   function with the given query parameter."
   [q]
-  (let [previous-urls (get-previous-query-results-urls q)]))
+  (let [previous-urls (get-previous-query-results-urls q)]
+    ;; return the current results but filter out those results whose URL is in
+    ;; the set of previous-urls
+    (->> (get-query-enlive-tags q)
+         (filter (fn [{{url :href} :attrs}]
+                   (not (previous-urls url)))))))
 
 (defn- htmlify-query-results
   [r])
