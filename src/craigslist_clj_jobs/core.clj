@@ -52,6 +52,15 @@ query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
          (filter (fn [{{url :href} :attrs}]
                    (not (previous-urls url)))))))
 
+(defn- save-query-result-urls
+  "Saves the URL for each of the given Enlive :a tag query results in a file
+  (whose name is the given query string with \".clj\" appended) in the app data
+  directory."
+  [q results]
+  (let [urls (set (map #(get-in % [:attrs :href])) results)
+        results-file (get-query-file q)]
+    (spit (java.io.File. results-file urls))))
+
 (defn- htmlify-query-results
   [r])
 
