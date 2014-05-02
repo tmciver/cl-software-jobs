@@ -1,4 +1,4 @@
-# craigslist-clj-jobs
+# cl-software-jobs
 
 A Clojure library designed to retrieve the results of a parameterized Craigslist
 search in the 'software' category.  The results will be emailed to a configured
