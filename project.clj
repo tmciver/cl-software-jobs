@@ -6,4 +6,6 @@ Craigslist."
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [clj-http "0.9.1"]
                  [enlive "1.1.5"]
-                 [com.draines/postal "1.11.1"]])
+                 [com.draines/postal "1.11.1"]]
+  :resource-paths ["src/resources"]
+  :main craigslist-clj-jobs.core)

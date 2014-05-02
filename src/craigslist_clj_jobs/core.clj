@@ -67,8 +67,20 @@ query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
         results-file (get-query-file q)]
     (spit (java.io.File. results-file urls))))
 
+(html/deftemplate email-template "templates/email-template.html"
+  [query-str enlive-query-results]
+  [:p#subject] (html/content (str "Query string: " query-str))
+  [:ul [:li]] (html/clone-for [result enlive-query-results]
+                              ;;(println result)
+                              [:li :a] (html/content (:content result))
+                              [:li :a] (html/set-attr :href (let [url (-> result :attrs :href)]
+                                                              (if (.startsWith url "http")
+                                                                url
+                                                                (str cl-url url))))))
+
 (defn- htmlify-query-results
-  [r])
+  [query-str enlive-query-results]
+  (apply str (email-template query-str enlive-query-results)))
 
 (defn- email-query-results
   [query-str enlive-query-results]
@@ -77,8 +89,8 @@ query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
         to (:to email-settings)
         server-settings (dissoc email-settings :from :to)]
     (mailer/send-message server-settings
-                         {:from from :to to :subject (str "\"" query-str "\"" " jobs
-  from Craigslist" :body (htmlify-query-results enlive-query-results))})))
+                         {:from from :to to :subject (str "\"" query-str "\"" " jobs from Craigslist")
+                          :body [{:type "text/html" :content (htmlify-query-results query-str enlive-query-results)}]})))
 
 (defn- run-craigslist-job-query
   "Performs the following side-effecting steps: 1) retrieves a collection of
@@ -87,8 +99,8 @@ gets the set of these results that are newer than when the query was last run,
 3) overwrites the old query results with the results of this new query, 4) sends
 an email to the given recipient showing the set of newer results."
   [q]
-  (let [enlive-results (get-newest-query-results q)
-        html-text (htmlify-query-results enlive-results)]))
+  (let [enlive-results (get-newest-query-results q)]
+    (email-query-results q enlive-results)))
 
 (defn -main
   [& args]
