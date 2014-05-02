@@ -1,4 +1,4 @@
-(ns craigslist-clj-jobs.core
+(ns craigslist-jobs.core
   (:require [net.cgrand.enlive-html :as html]
             [clojure.java.io :as io]
             [clojure.edn :as edn]
