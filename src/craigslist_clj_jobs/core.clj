@@ -1,7 +1,8 @@
 (ns craigslist-clj-jobs.core
   (:require [net.cgrand.enlive-html :as html]
             [clojure.java.io :as io]
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn]
+            [postal.core :as mailer]))
 
 (def cl-url "http://boston.craigslist.org")
 (def craigslist-clj-jobs-url (str cl-url "/search/sof?catAbb=sof&query="))
@@ -13,6 +14,11 @@
   []
   (doto (java.io.File. (str (System/getProperty "user.home") java.io.File/separator cl-app-dir-name))
     (.mkdirs)))
+
+(defn- get-email-settings-file
+  "Returns a java.io.File object for the email settings file."
+  []
+  (java.io.File. (get-cl-app-dir) "email-settings.clj"))
 
 (defn- get-query-file
   "Returns a java.io.File for the given query."
@@ -63,6 +69,16 @@ query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
 
 (defn- htmlify-query-results
   [r])
+
+(defn- email-query-results
+  [query-str enlive-query-results]
+  (let [email-settings (read-string (slurp (get-email-settings-file)))
+        from (:from email-settings)
+        to (:to email-settings)
+        server-settings (dissoc email-settings :from :to)]
+    (mailer/send-message server-settings
+                         {:from from :to to :subject (str "\"" query-str "\"" " jobs
+  from Craigslist" :body (htmlify-query-results enlive-query-results))})))
 
 (defn- run-craigslist-job-query
   "Performs the following side-effecting steps: 1) retrieves a collection of

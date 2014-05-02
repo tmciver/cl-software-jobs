@@ -5,5 +5,5 @@ Craigslist."
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [clj-http "0.9.1"]
-                 [enlive "1.1.5"]])
-
+                 [enlive "1.1.5"]
+                 [com.draines/postal "1.11.1"]])
