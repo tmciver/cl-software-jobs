@@ -71,7 +71,6 @@ query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
   [query-str enlive-query-results]
   [:p#subject] (html/content (str "Query string: " query-str))
   [:ul [:li]] (html/clone-for [result enlive-query-results]
-                              ;;(println result)
                               [:li :a] (html/content (:content result))
                               [:li :a] (html/set-attr :href (let [url (-> result :attrs :href)]
                                                               (if (.startsWith url "http")
@@ -87,10 +86,15 @@ query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
   (let [email-settings (read-string (slurp (get-email-settings-file)))
         from (:from email-settings)
         to (:to email-settings)
-        server-settings (dissoc email-settings :from :to)]
+        server-settings (dissoc email-settings :from :to)
+        subject (let [prefix (if (empty? enlive-query-results) "No new " "")]
+                  (str prefix "Craigslist jobs found for \"" query-str "\""))
+        message (if (empty? enlive-query-results)
+                  subject
+                  (htmlify-query-results query-str enlive-query-results))]
     (mailer/send-message server-settings
-                         {:from from :to to :subject (str "\"" query-str "\"" " jobs from Craigslist")
-                          :body [{:type "text/html" :content (htmlify-query-results query-str enlive-query-results)}]})))
+                         {:from from :to to :subject subject
+                          :body [{:type "text/html" :content message}]})))
 
 (defn- run-craigslist-job-query
   "Performs the following side-effecting steps: 1) retrieves a collection of
