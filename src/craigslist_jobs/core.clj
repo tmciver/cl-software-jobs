@@ -63,9 +63,9 @@ query. An Enlive :a tag is a map with keys :tag (and value :a), :attrs (a map of
   (whose name is the given query string with \".clj\" appended) in the app data
   directory."
   [q results]
-  (let [urls (set (map #(get-in % [:attrs :href])) results)
+  (let [urls (set (map #(get-in % [:attrs :href]) results))
         results-file (get-query-file q)]
-    (spit (java.io.File. results-file urls))))
+    (spit results-file urls)))
 
 (html/deftemplate email-template "templates/email-template.html"
   [query-str enlive-query-results]
@@ -100,6 +100,7 @@ gets the set of these results that are newer than when the query was last run,
 an email to the given recipient showing the set of newer results."
   [q]
   (let [enlive-results (get-newest-query-results q)]
+    (save-query-result-urls q enlive-results)
     (email-query-results q enlive-results)))
 
 (defn -main
